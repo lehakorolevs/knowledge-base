@@ -1,0 +1,1950 @@
+const GOOGLE_CLIENT_ID = '52537077192-jti96ndcn4803n6kfbqdm9ogb3v3fr29.apps.googleusercontent.com';
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>База знаний — Документация</title>
+<style>
+:root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-light: #eef2ff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --text: #1f2937;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f9fafb;
+    --bg-card: #ffffff;
+    --sidebar-width: 300px;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ============ ОБЩАЯ РАЗМЕТКА ============ */
+.app {
+    display: flex;
+    height: 100vh;
+}
+
+/* ============ САЙДБАР ============ */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--primary), #7c3aed);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.6rem 0.9rem 0.6rem 2.3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    background: var(--bg);
+    transition: all 0.2s;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+}
+
+.search-box::before {
+    content: '🔍';
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    opacity: 0.5;
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.sidebar-content::-webkit-scrollbar { width: 6px; }
+.sidebar-content::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sidebar-footer button {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.sidebar-footer button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* ============ КАТЕГОРИИ И СТАТЬИ ============ */
+.category {
+    margin-bottom: 0.5rem;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.category-header:hover { background: var(--bg); }
+.category-header.active { background: var(--primary-light); }
+
+.category-arrow {
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+    color: var(--text-secondary);
+}
+
+.category.expanded .category-arrow { transform: rotate(90deg); }
+
+.category-name {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.category-count {
+    background: var(--bg);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.category-actions {
+    display: none;
+    gap: 0.25rem;
+}
+
+.category-header:hover .category-actions { display: flex; }
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.2rem;
+    border-radius: 4px;
+    opacity: 0.6;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover { opacity: 1; background: rgba(0,0,0,0.05); }
+
+.article-list {
+    display: none;
+    padding-left: 1.5rem;
+    margin-top: 0.25rem;
+}
+
+.category.expanded .article-list { display: block; }
+
+.article-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    margin-bottom: 2px;
+}
+
+.article-item:hover { background: var(--bg); color: var(--text); }
+.article-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+
+.article-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.article-status-dot.published { background: var(--success); }
+.article-status-dot.draft { background: var(--warning); }
+
+.article-title-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.add-category-btn, .add-article-btn {
+    width: 100%;
+    padding: 0.6rem;
+    border: 2px dashed var(--border);
+    background: transparent;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+}
+
+.add-category-btn:hover, .add-article-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+/* ============ ОСНОВНАЯ ОБЛАСТЬ ============ */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.main-header {
+    padding: 1rem 2rem;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.breadcrumbs .separator { opacity: 0.4; }
+.breadcrumbs .current { color: var(--text); font-weight: 600; }
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 8px rgba(79,70,229,0.3); }
+.btn-secondary { background: white; color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #dc2626; }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #059669; }
+.btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+
+.main-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.main-body::-webkit-scrollbar { width: 8px; }
+.main-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+/* ============ ПУСТОЕ СОСТОЯНИЕ ============ */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.empty-state h2 {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    max-width: 400px;
+    margin-bottom: 1.5rem;
+}
+
+/* ============ ПРОСМОТР СТАТЬИ ============ */
+.article-view {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.article-view-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.article-view-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+}
+
+.article-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    padding: 0.2rem 0.7rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.published { background: #d1fae5; color: #065f46; }
+.status-badge.draft { background: #fef3c7; color: #92400e; }
+
+.tags-container {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 0.15rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.article-description {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+/* ============ БЛОКИ КОНТЕНТА (просмотр) ============ */
+.block {
+    margin-bottom: 1.25rem;
+    position: relative;
+}
+
+.block-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.block-paragraph {
+    font-size: 1rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
+}
+
+.block-command {
+    background: #1e293b;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid #334155;
+}
+
+.command-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+}
+
+.command-label {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.copy-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #cbd5e1;
+    padding: 0.3rem 0.7rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+.copy-btn.copied { background: var(--success); color: white; }
+
+.block-command pre {
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    color: #e2e8f0;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.block-command pre code { background: none; padding: 0; color: inherit; }
+
+.block-warning, .block-info, .block-success {
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius);
+    border-left: 4px solid;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.block-warning { background: #fef3c7; border-color: var(--warning); }
+.block-warning .alert-icon { color: var(--warning); }
+.block-info { background: #dbeafe; border-color: var(--info); }
+.block-info .alert-icon { color: var(--info); }
+.block-success { background: #d1fae5; border-color: var(--success); }
+.block-success .alert-icon { color: var(--success); }
+
+.alert-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+.alert-content { flex: 1; white-space: pre-wrap; }
+.block-warning .alert-content strong { color: #92400e; }
+.block-info .alert-content strong { color: #1e40af; }
+.block-success .alert-content strong { color: #065f46; }
+
+.block-list ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.block-list li {
+    padding: 0.5rem 0 0.5rem 1.75rem;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+}
+
+.block-list li:last-child { border-bottom: none; }
+
+.block-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0.5rem;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+code {
+    background: #f1f5f9;
+    color: #dc2626;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.85em;
+}
+
+/* ============ РЕДАКТОР СТАТЬИ ============ */
+.article-editor {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.editor-field {
+    margin-bottom: 1.5rem;
+}
+
+.editor-field label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.editor-field label .hint {
+    font-weight: 400;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.editor-field input[type="text"],
+.editor-field textarea,
+.editor-field select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s;
+    background: white;
+}
+
+.editor-field input:focus,
+.editor-field textarea:focus,
+.editor-field select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+}
+
+.editor-title-input {
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    padding: 1rem !important;
+}
+
+.editor-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* ============ РЕДАКТОР БЛОКОВ ============ */
+.blocks-editor {
+    margin-top: 2rem;
+    border-top: 2px solid var(--border);
+    padding-top: 1.5rem;
+}
+
+.blocks-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.blocks-editor-header h3 {
+    font-size: 1.1rem;
+}
+
+.editor-block {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.editor-block:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+}
+
+.editor-block-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.block-type-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.block-type-badge.heading { background: #e0e7ff; color: var(--primary); }
+.block-type-badge.paragraph { background: #f3f4f6; color: var(--text-secondary); }
+.block-type-badge.command { background: #1e293b; color: #e2e8f0; }
+.block-type-badge.warning { background: #fef3c7; color: #92400e; }
+.block-type-badge.info { background: #dbeafe; color: #1e40af; }
+.block-type-badge.success { background: #d1fae5; color: #065f46; }
+.block-type-badge.list { background: #fce7f3; color: #9d174d; }
+
+.editor-block-body {
+    padding: 1rem;
+}
+
+.editor-block-body textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    min-height: 80px;
+    resize: vertical;
+    transition: all 0.2s;
+}
+
+.editor-block-body textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+}
+
+.editor-block-body textarea.code-input {
+    font-family: 'Consolas', monospace;
+    background: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+}
+
+.block-controls {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+.block-control-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.block-control-btn:hover { background: rgba(0,0,0,0.08); color: var(--text); }
+.block-control-btn.danger:hover { background: #fee2e2; color: var(--danger); }
+
+/* ============ ДОБАВЛЕНИЕ БЛОКА ============ */
+.add-block-menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    margin-top: 1rem;
+}
+
+.add-block-option {
+    padding: 0.9rem;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.add-block-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.add-block-option .block-option-icon {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+/* ============ РЕЗУЛЬТАТЫ ПОИСКА ============ */
+.search-results {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.search-results h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.search-result-item {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-result-item:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+    transform: translateX(4px);
+}
+
+.search-result-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 0.3rem;
+    color: var(--primary);
+}
+
+.search-result-category {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.search-result-snippet {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.search-result-snippet mark {
+    background: #fef08a;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+/* ============ МОДАЛЬНОЕ ОКНО ============ */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s;
+}
+
+.modal.active { display: flex; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.modal-header h3 { font-size: 1.2rem; }
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    line-height: 1;
+}
+
+.modal-close:hover { color: var(--danger); }
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.emoji-picker {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.emoji-option {
+    font-size: 1.3rem;
+    padding: 0.4rem;
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    cursor: pointer;
+    background: var(--bg);
+    transition: all 0.2s;
+}
+
+.emoji-option:hover { transform: scale(1.15); }
+.emoji-option.selected { border-color: var(--primary); background: var(--primary-light); }
+
+/* ============ УВЕДОМЛЕНИЯ ============ */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--text);
+    color: white;
+    padding: 0.85rem 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    animation: slideUp 0.3s;
+}
+
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+
+/* ============ АДАПТИВНОСТЬ ============ */
+@media (max-width: 768px) {
+    .sidebar { position: absolute; z-index: 100; height: 100%; transform: translateX(-100%); transition: transform 0.3s; }
+    .sidebar.open { transform: translateX(0); }
+    .main-header { padding: 1rem; }
+    .main-body { padding: 1rem; }
+    .editor-row { grid-template-columns: 1fr; }
+    .article-view-title { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+    <!-- ============ САЙДБАР ============ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">📚</div>
+                <span>База знаний</span>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Поиск по документации..." oninput="handleSearch(this.value)">
+            </div>
+        </div>
+        
+        <div class="sidebar-content" id="sidebarContent">
+            <!-- Категории и статьи рендерятся здесь -->
+        </div>
+        
+        <div class="sidebar-footer">
+            <button onclick="exportData()" title="Экспорт всех данных в JSON">📥 Экспорт</button>
+            <button onclick="document.getElementById('importFile').click()" title="Импорт данных из JSON">📤 Импорт</button>
+            <button onclick="showStats()" title="Статистика">📊</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+    </aside>
+
+    <!-- ============ ОСНОВНАЯ ОБЛАСТЬ ============ -->
+    <main class="main">
+        <div class="main-header">
+            <div class="breadcrumbs" id="breadcrumbs">
+                <span>🏠 Главная</span>
+            </div>
+            <div class="header-actions" id="headerActions"></div>
+        </div>
+        
+        <div class="main-body" id="mainBody">
+            <!-- Контент рендерится здесь -->
+        </div>
+    </main>
+</div>
+
+<!-- ============ МОДАЛЬНОЕ ОКНО КАТЕГОРИИ ============ -->
+<div class="modal" id="categoryModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="categoryModalTitle">Новая категория</h3>
+            <button class="modal-close" onclick="closeModal('categoryModal')">&times;</button>
+        </div>
+        <input type="hidden" id="categoryEditId">
+        <div class="editor-field">
+            <label>Название категории</label>
+            <input type="text" id="categoryNameInput" placeholder="Например: Настройка сервера" onkeypress="if(event.key==='Enter') saveCategory()">
+        </div>
+        <div class="editor-field">
+            <label>Иконка</label>
+            <div class="emoji-picker" id="emojiPicker"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('categoryModal')">Отмена</button>
+            <button class="btn btn-primary" onclick="saveCategory()">💾 Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// ДАННЫЕ И СОСТОЯНИЕ
+// ============================================================
+const STORAGE_KEY = 'knowledgeBaseV1';
+const EMOJIS = ['📁', '🖥️', '🌐', '🔧', '🔐', '📷', '🎤', '💾', '📋', '⚙️', '🐛', '📖', '🚀', '💡', '🔌', '🖨️'];
+
+const BLOCK_TYPES = {
+    heading:   { label: 'Заголовок',       icon: '🔤', hint: 'Подзаголовок раздела' },
+    paragraph: { label: 'Текст',           icon: '📝', hint: 'Обычный текст, абзацы' },
+    command:   { label: 'Команда / Код',   icon: '💻', hint: 'Блок с кнопкой копирования' },
+    warning:   { label: 'Предупреждение',  icon: '⚠️', hint: 'Жёлтый блок внимания' },
+    info:      { label: 'Информация',      icon: 'ℹ️', hint: 'Синий информационный блок' },
+    success:   { label: 'Успех / Совет',   icon: '✅', hint: 'Зелёный блок' },
+    list:      { label: 'Список',          icon: '📋', hint: 'Каждая строка = пункт' }
+};
+
+let state = {
+    categories: [],
+    articles: [],
+    currentView: 'welcome',       // welcome | article | editor | search | category
+    currentArticleId: null,
+    currentCategoryId: null,
+    searchQuery: '',
+    editingBlocks: [],            // временные блоки в редакторе
+    selectedEmoji: '📁'
+};
+
+// ============================================================
+// СОХРАНЕНИЕ / ЗАГРУЗКА
+// ============================================================
+function loadData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            state.categories = parsed.categories || [];
+            state.articles = parsed.articles || [];
+        }
+    } catch (e) {
+        console.error('Ошибка загрузки данных:', e);
+    }
+}
+
+function saveData() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            categories: state.categories,
+            articles: state.articles,
+            savedAt: new Date().toISOString()
+        }));
+    } catch (e) {
+        showToast('Ошибка сохранения данных!', 'error');
+    }
+}
+
+// ============================================================
+// УТИЛИТЫ
+// ============================================================
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleString('ru-RU', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'} ${escapeHtml(message)}`;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
+}
+
+function confirmDialog(message) {
+    return confirm(message);
+}
+
+// ============================================================
+// КАТЕГОРИИ
+// ============================================================
+function openCategoryModal(categoryId = null) {
+    const modal = document.getElementById('categoryModal');
+    const titleEl = document.getElementById('categoryModalTitle');
+    const nameInput = document.getElementById('categoryNameInput');
+    const editIdEl = document.getElementById('categoryEditId');
+    
+    // Рендер пикера эмодзи
+    const picker = document.getElementById('emojiPicker');
+    picker.innerHTML = EMOJIS.map(e => 
+        `<div class="emoji-option" data-emoji="${e}" onclick="selectEmoji('${e}')">${e}</div>`
+    ).join('');
+    
+    if (categoryId) {
+        const cat = state.categories.find(c => c.id === categoryId);
+        if (cat) {
+            titleEl.textContent = 'Редактировать категорию';
+            nameInput.value = cat.name;
+            editIdEl.value = categoryId;
+            selectEmoji(cat.icon || '📁');
+        }
+    } else {
+        titleEl.textContent = 'Новая категория';
+        nameInput.value = '';
+        editIdEl.value = '';
+        selectEmoji('📁');
+    }
+    
+    modal.classList.add('active');
+    setTimeout(() => nameInput.focus(), 100);
+}
+
+function selectEmoji(emoji) {
+    state.selectedEmoji = emoji;
+    document.querySelectorAll('.emoji-option').forEach(el => {
+        el.classList.toggle('selected', el.dataset.emoji === emoji);
+    });
+}
+
+function saveCategory() {
+    const name = document.getElementById('categoryNameInput').value.trim();
+    const editId = document.getElementById('categoryEditId').value;
+    
+    if (!name) {
+        showToast('Введите название категории', 'error');
+        return;
+    }
+    
+    if (editId) {
+        const cat = state.categories.find(c => c.id === editId);
+        if (cat) {
+            cat.name = name;
+            cat.icon = state.selectedEmoji;
+            cat.updatedAt = new Date().toISOString();
+            showToast('Категория обновлена');
+        }
+    } else {
+        state.categories.push({
+            id: generateId(),
+            name,
+            icon: state.selectedEmoji,
+            createdAt: new Date().toISOString(),
+            expanded: true
+        });
+        showToast('Категория создана');
+    }
+    
+    saveData();
+    closeModal('categoryModal');
+    renderSidebar();
+}
+
+function deleteCategory(categoryId) {
+    const cat = state.categories.find(c => c.id === categoryId);
+    const articlesCount = state.articles.filter(a => a.categoryId === categoryId).length;
+    
+    let msg = `Удалить категорию "${cat?.name}"?`;
+    if (articlesCount > 0) msg += `\n\n⚠️ В ней ${articlesCount} статей — они тоже будут удалены!`;
+    
+    if (!confirmDialog(msg)) return;
+    
+    state.categories = state.categories.filter(c => c.id !== categoryId);
+    state.articles = state.articles.filter(a => a.categoryId !== categoryId);
+    
+    if (state.currentCategoryId === categoryId) {
+        state.currentView = 'welcome';
+        state.currentCategoryId = null;
+    }
+    
+    saveData();
+    renderSidebar();
+    renderMain();
+    showToast('Категория удалена');
+}
+
+function toggleCategory(categoryId) {
+    const cat = state.categories.find(c => c.id === categoryId);
+    if (cat) {
+        cat.expanded = !cat.expanded;
+        saveData();
+        renderSidebar();
+    }
+}
+
+// ============================================================
+// СТАТЬИ
+// ============================================================
+function createArticle(categoryId) {
+    const article = {
+        id: generateId(),
+        categoryId,
+        title: 'Новая статья',
+        description: '',
+        tags: [],
+        status: 'draft',
+        blocks: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+    
+    state.articles.push(article);
+    saveData();
+    renderSidebar();
+    openEditor(article.id);
+}
+
+function openArticle(articleId) {
+    state.currentView = 'article';
+    state.currentArticleId = articleId;
+    state.searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    renderSidebar();
+    renderMain();
+}
+
+function openEditor(articleId) {
+    const article = state.articles.find(a => a.id === articleId);
+    if (!article) return;
+    
+    state.currentView = 'editor';
+    state.currentArticleId = articleId;
+    state.editingBlocks = JSON.parse(JSON.stringify(article.blocks));
+    renderSidebar();
+    renderMain();
+}
+
+function deleteArticle(articleId) {
+    const article = state.articles.find(a => a.id === articleId);
+    if (!confirmDialog(`Удалить статью "${article?.title}"?`)) return;
+    
+    state.articles = state.articles.filter(a => a.id !== articleId);
+    
+    if (state.currentArticleId === articleId) {
+        state.currentView = state.currentCategoryId ? 'category' : 'welcome';
+        state.currentArticleId = null;
+    }
+    
+    saveData();
+    renderSidebar();
+    renderMain();
+    showToast('Статья удалена');
+}
+
+function saveArticleFromEditor() {
+    const article = state.articles.find(a => a.id === state.currentArticleId);
+    if (!article) return;
+    
+    const title = document.getElementById('editorTitle').value.trim();
+    if (!title) {
+        showToast('Введите заголовок статьи', 'error');
+        return;
+    }
+    
+    article.title = title;
+    article.description = document.getElementById('editorDescription').value.trim();
+    article.status = document.getElementById('editorStatus').value;
+    article.tags = document.getElementById('editorTags').value
+        .split(',')
+        .map(t => t.trim())
+        .filter(t => t);
+    article.blocks = state.editingBlocks.filter(b => b.content.trim());
+    article.updatedAt = new Date().toISOString();
+    
+    saveData();
+    state.currentView = 'article';
+    renderSidebar();
+    renderMain();
+    showToast('Статья сохранена');
+}
+
+// ============================================================
+// БЛОКИ В РЕДАКТОРЕ
+// ============================================================
+function addBlock(type) {
+    state.editingBlocks.push({
+        id: generateId(),
+        type,
+        content: ''
+    });
+    renderEditorBlocks();
+    // Фокус на новое поле
+    setTimeout(() => {
+        const textareas = document.querySelectorAll('.editor-block textarea');
+        const last = textareas[textareas.length - 1];
+        if (last) {
+            last.focus();
+            last.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 50);
+}
+
+function updateBlock(blockId, value) {
+    const block = state.editingBlocks.find(b => b.id === blockId);
+    if (block) block.content = value;
+}
+
+function removeBlock(blockId) {
+    state.editingBlocks = state.editingBlocks.filter(b => b.id !== blockId);
+    renderEditorBlocks();
+}
+
+function moveBlock(blockId, direction) {
+    const idx = state.editingBlocks.findIndex(b => b.id === blockId);
+    if (idx === -1) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= state.editingBlocks.length) return;
+    
+    [state.editingBlocks[idx], state.editingBlocks[newIdx]] = 
+    [state.editingBlocks[newIdx], state.editingBlocks[idx]];
+    renderEditorBlocks();
+}
+
+function renderEditorBlocks() {
+    const container = document.getElementById('blocksList');
+    if (!container) return;
+    
+    if (state.editingBlocks.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:2rem; color:var(--text-secondary); background:var(--bg); border-radius:var(--radius); border:2px dashed var(--border);">
+                <p style="margin-bottom:0.5rem; font-size:2rem;">📭</p>
+                <p>Пока нет блоков. Добавьте первый блок ниже.</p>
+            </div>`;
+        return;
+    }
+    
+    container.innerHTML = state.editingBlocks.map((block, idx) => {
+        const typeInfo = BLOCK_TYPES[block.type];
+        const isCode = block.type === 'command';
+        const placeholder = {
+            heading: 'Текст заголовка...',
+            paragraph: 'Введите текст. Пустая строка разделяет абзацы...',
+            command: 'sudo apt update\nsudo apt install...',
+            warning: 'Текст предупреждения...',
+            info: 'Полезная информация...',
+            success: 'Совет или положительный результат...',
+            list: 'Первый пункт\nВторой пункт\nТретий пункт'
+        }[block.type];
+        
+        return `
+        <div class="editor-block">
+            <div class="editor-block-header">
+                <span class="block-type-badge ${block.type}">${typeInfo.icon} ${typeInfo.label}</span>
+                <div class="block-controls">
+                    <button class="block-control-btn" onclick="moveBlock('${block.id}', -1)" title="Вверх" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''}>↑</button>
+                    <button class="block-control-btn" onclick="moveBlock('${block.id}', 1)" title="Вниз" ${idx === state.editingBlocks.length - 1 ? 'disabled style="opacity:0.3"' : ''}>↓</button>
+                    <button class="block-control-btn danger" onclick="removeBlock('${block.id}')" title="Удалить блок">🗑️</button>
+                </div>
+            </div>
+            <div class="editor-block-body">
+                <textarea class="${isCode ? 'code-input' : ''}" 
+                    placeholder="${placeholder}"
+                    oninput="updateBlock('${block.id}', this.value)">${escapeHtml(block.content)}</textarea>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ============================================================
+// ПОИСК
+// ============================================================
+function handleSearch(query) {
+    state.searchQuery = query.trim().toLowerCase();
+    
+    if (!state.searchQuery) {
+        state.currentView = state.currentArticleId ? 'article' : (state.currentCategoryId ? 'category' : 'welcome');
+        renderMain();
+        return;
+    }
+    
+    state.currentView = 'search';
+    renderMain();
+}
+
+function searchArticles() {
+    if (!state.searchQuery) return [];
+    
+    const results = [];
+    
+    state.articles.forEach(article => {
+        const cat = state.categories.find(c => c.id === article.categoryId);
+        let score = 0;
+        let snippet = '';
+        
+        // Поиск в заголовке (наивысший приоритет)
+        if (article.title.toLowerCase().includes(state.searchQuery)) {
+            score += 10;
+        }
+        
+        // Поиск в тегах
+        if (article.tags.some(t => t.toLowerCase().includes(state.searchQuery))) {
+            score += 5;
+        }
+        
+        // Поиск в описании
+        if (article.description.toLowerCase().includes(state.searchQuery)) {
+            score += 3;
+        }
+        
+        // Поиск в блоках
+        article.blocks.forEach(block => {
+            const idx = block.content.toLowerCase().indexOf(state.searchQuery);
+            if (idx !== -1) {
+                score += 2;
+                if (!snippet) {
+                    const start = Math.max(0, idx - 40);
+                    const end = Math.min(block.content.length, idx + state.searchQuery.length + 60);
+                    snippet = (start > 0 ? '...' : '') + 
+                              block.content.substring(start, end) + 
+                              (end < block.content.length ? '...' : '');
+                }
+            }
+        });
+        
+        if (score > 0) {
+            results.push({ article, category: cat, score, snippet });
+        }
+    });
+    
+    return results.sort((a, b) => b.score - a.score);
+}
+
+// ============================================================
+// РЕНДЕР САЙДБАРА
+// ============================================================
+function renderSidebar() {
+    const container = document.getElementById('sidebarContent');
+    
+    if (state.categories.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary);">
+                <p style="font-size:2rem; margin-bottom:0.5rem;">📂</p>
+                <p style="font-size:0.85rem; margin-bottom:1rem;">Пока нет категорий</p>
+            </div>
+            <button class="add-category-btn" onclick="openCategoryModal()">➕ Создать первую категорию</button>`;
+        return;
+    }
+    
+    let html = '';
+    
+    state.categories.forEach(cat => {
+        const articles = state.articles.filter(a => a.categoryId === cat.id);
+        const isActive = state.currentCategoryId === cat.id && state.currentView === 'category';
+        
+        html += `
+        <div class="category ${cat.expanded ? 'expanded' : ''}">
+            <div class="category-header ${isActive ? 'active' : ''}" onclick="openCategory('${cat.id}')">
+                <span class="category-arrow" onclick="event.stopPropagation(); toggleCategory('${cat.id}')">▶</span>
+                <span class="category-name">${cat.icon || '📁'} ${escapeHtml(cat.name)}</span>
+                <span class="category-count">${articles.length}</span>
+                <div class="category-actions">
+                    <button class="icon-btn" onclick="event.stopPropagation(); openCategoryModal('${cat.id}')" title="Редактировать">✏️</button>
+                    <button class="icon-btn" onclick="event.stopPropagation(); deleteCategory('${cat.id}')" title="Удалить">🗑️</button>
+                </div>
+            </div>
+            <div class="article-list">
+                ${articles.map(a => `
+                    <div class="article-item ${state.currentArticleId === a.id && state.currentView !== 'editor' ? 'active' : ''}" 
+                         onclick="openArticle('${a.id}')">
+                        <span class="article-status-dot ${a.status}"></span>
+                        <span class="article-title-text">${escapeHtml(a.title)}</span>
+                    </div>
+                `).join('')}
+                <button class="add-article-btn" onclick="createArticle('${cat.id}')">➕ Новая статья</button>
+            </div>
+        </div>`;
+    });
+    
+    html += `<button class="add-category-btn" onclick="openCategoryModal()">➕ Новая категория</button>`;
+    container.innerHTML = html;
+}
+
+function openCategory(categoryId) {
+    state.currentView = 'category';
+    state.currentCategoryId = categoryId;
+    state.currentArticleId = null;
+    state.searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    renderSidebar();
+    renderMain();
+}
+
+// ============================================================
+// РЕНДЕР ОСНОВНОЙ ОБЛАСТИ
+// ============================================================
+function renderMain() {
+    const mainBody = document.getElementById('mainBody');
+    const breadcrumbs = document.getElementById('breadcrumbs');
+    const headerActions = document.getElementById('headerActions');
+    
+    // Сброс действий
+    headerActions.innerHTML = '';
+    
+    switch (state.currentView) {
+        case 'welcome':
+            breadcrumbs.innerHTML = '<span>🏠 Главная</span>';
+            renderWelcome(mainBody);
+            break;
+            
+        case 'category':
+            renderCategoryView(mainBody, breadcrumbs, headerActions);
+            break;
+            
+        case 'article':
+            renderArticleView(mainBody, breadcrumbs, headerActions);
+            break;
+            
+        case 'editor':
+            renderEditorView(mainBody, breadcrumbs, headerActions);
+            break;
+            
+        case 'search':
+            breadcrumbs.innerHTML = `<span>🔍 Поиск: "${escapeHtml(state.searchQuery)}"</span>`;
+            renderSearchResults(mainBody);
+            break;
+    }
+}
+
+// ---------- Приветственный экран ----------
+function renderWelcome(container) {
+    const totalArticles = state.articles.length;
+    const totalCategories = state.categories.length;
+    
+    container.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">📚</div>
+            <h2>Добро пожаловать в базу знаний!</h2>
+            <p>${totalCategories === 0 
+                ? 'Начните создавать документацию: создайте первую категорию, а затем добавляйте в неё статьи.'
+                : `У вас ${totalCategories} категорий и ${totalArticles} статей. Выберите раздел слева или создайте новый.`}</p>
+            <button class="btn btn-primary" onclick="openCategoryModal()">📁 Создать категорию</button>
+            <div style="margin-top:3rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; max-width:700px; width:100%;">
+                <div style="padding:1.5rem; background:white; border-radius:12px; border:1px solid var(--border);">
+                    <div style="font-size:1.75rem; margin-bottom:0.5rem;">🧱</div>
+                    <strong style="display:block; margin-bottom:0.3rem;">Блочный редактор</strong>
+                    <small style="color:var(--text-secondary);">Заголовки, текст, команды, предупреждения, списки</small>
+                </div>
+                <div style="padding:1.5rem; background:white; border-radius:12px; border:1px solid var(--border);">
+                    <div style="font-size:1.75rem; margin-bottom:0.5rem;">🔍</div>
+                    <strong style="display:block; margin-bottom:0.3rem;">Умный поиск</strong>
+                    <small style="color:var(--text-secondary);">Мгновенный поиск по всем статьям и содержимому</small>
+                </div>
+                <div style="padding:1.5rem; background:white; border-radius:12px; border:1px solid var(--border);">
+                    <div style="font-size:1.75rem; margin-bottom:0.5rem;">💾</div>
+                    <strong style="display:block; margin-bottom:0.3rem;">Автосохранение</strong>
+                    <small style="color:var(--text-secondary);">Все данные хранятся локально + экспорт в JSON</small>
+                </div>
+            </div>
+        </div>`;
+}
+
+// ---------- Просмотр категории ----------
+function renderCategoryView(container, breadcrumbs, headerActions) {
+    const cat = state.categories.find(c => c.id === state.currentCategoryId);
+    if (!cat) { state.currentView = 'welcome'; renderMain(); return; }
+    
+    const articles = state.articles.filter(a => a.categoryId === cat.id);
+    
+    breadcrumbs.innerHTML = `
+        <span style="cursor:pointer" onclick="goHome()">🏠 Главная</span>
+        <span class="separator">/</span>
+        <span class="current">${cat.icon} ${escapeHtml(cat.name)}</span>`;
+    
+    headerActions.innerHTML = `
+        <button class="btn btn-primary btn-sm" onclick="createArticle('${cat.id}')">➕ Новая статья</button>
+        <button class="btn btn-secondary btn-sm" onclick="openCategoryModal('${cat.id}')">✏️ Редактировать</button>`;
+    
+    if (articles.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📄</div>
+                <h2>В категории пока пусто</h2>
+                <p>Создайте первую статью в категории "${escapeHtml(cat.name)}"</p>
+                <button class="btn btn-primary" onclick="createArticle('${cat.id}')">➕ Создать статью</button>
+            </div>`;
+        return;
+    }
+    
+    container.innerHTML = `
+        <div style="max-width:850px; margin:0 auto;">
+            <h1 style="font-size:2rem; margin-bottom:0.5rem;">${cat.icon} ${escapeHtml(cat.name)}</h1>
+            <p style="color:var(--text-secondary); margin-bottom:2rem;">${articles.length} статей в этой категории</p>
+            <div style="display:grid; gap:1rem;">
+                ${articles.map(a => `
+                    <div class="search-result-item" onclick="openArticle('${a.id}')">
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <div class="search-result-title" style="margin:0;">${escapeHtml(a.title)}</div>
+                            <span class="status-badge ${a.status}">${a.status === 'published' ? 'Опубликовано' : 'Черновик'}</span>
+                        </div>
+                        ${a.description ? `<div style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.4rem;">${escapeHtml(a.description)}</div>` : ''}
+                        <div class="search-result-category" style="margin-top:0.5rem;">
+                            🕐 Обновлена: ${formatDate(a.updatedAt)}
+                            ${a.tags.length ? ' · 🏷️ ' + a.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(' ') : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+}
+
+// ---------- Просмотр статьи ----------
+function renderArticleView(container, breadcrumbs, headerActions) {
+    const article = state.articles.find(a => a.id === state.currentArticleId);
+    if (!article) { state.currentView = 'welcome'; renderMain(); return; }
+    
+    const cat = state.categories.find(c => c.id === article.categoryId);
+    
+    breadcrumbs.innerHTML = `
+        <span style="cursor:pointer" onclick="goHome()">🏠 Главная</span>
+        <span class="separator">/</span>
+        ${cat ? `<span style="cursor:pointer" onclick="openCategory('${cat.id}')">${cat.icon} ${escapeHtml(cat.name)}</span>
+        <span class="separator">/</span>` : ''}
+        <span class="current">${escapeHtml(article.title)}</span>`;
+    
+    headerActions.innerHTML = `
+        <button class="btn btn-primary btn-sm" onclick="openEditor('${article.id}')">✏️ Редактировать</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteArticle('${article.id}')">🗑️</button>`;
+    
+    const blocksHtml = article.blocks.map(block => renderBlockView(block)).join('');
+    
+    container.innerHTML = `
+        <div class="article-view">
+            <div class="article-view-header">
+                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.75rem;">
+                    <span class="status-badge ${article.status}">${article.status === 'published' ? '✅ Опубликовано' : '📝 Черновик'}</span>
+                </div>
+                <h1 class="article-view-title">${escapeHtml(article.title)}</h1>
+                ${article.description ? `<p class="article-description">${escapeHtml(article.description)}</p>` : ''}
+                <div class="article-meta">
+                    ${article.tags.length ? `<div class="tags-container">${article.tags.map(t => `<span class="tag">🏷️ ${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+                    <span>🕐 Изменена: ${formatDate(article.updatedAt)}</span>
+                </div>
+            </div>
+            ${article.blocks.length === 0 
+                ? '<div class="empty-state" style="height:auto; padding:3rem;"><div class="empty-state-icon">📭</div><p>Статья пока пустая. Нажмите "Редактировать", чтобы добавить содержимое.</p></div>'
+                : blocksHtml}
+        </div>`;
+}
+
+function renderBlockView(block) {
+    const content = escapeHtml(block.content);
+    
+    switch (block.type) {
+        case 'heading':
+            return `<div class="block"><h2 class="block-heading">${content}</h2></div>`;
+            
+        case 'paragraph':
+            return `<div class="block"><div class="block-paragraph">${content}</div></div>`;
+            
+        case 'command':
+            return `
+                <div class="block block-command">
+                    <div class="command-header">
+                        <span class="command-label">💻 Терминал</span>
+                        <button class="copy-btn" onclick="copyCommand(this, '${block.id}')">📋 Копировать</button>
+                    </div>
+                    <pre><code data-block-id="${block.id}">${content}</code></pre>
+                </div>`;
+            
+        case 'warning':
+            return `
+                <div class="block block-warning">
+                    <span class="alert-icon">⚠️</span>
+                    <div class="alert-content">${content}</div>
+                </div>`;
+            
+        case 'info':
+            return `
+                <div class="block block-info">
+                    <span class="alert-icon">ℹ️</span>
+                    <div class="alert-content">${content}</div>
+                </div>`;
+            
+        case 'success':
+            return `
+                <div class="block block-success">
+                    <span class="alert-icon">✅</span>
+                    <div class="alert-content">${content}</div>
+                </div>`;
+            
+        case 'list':
+            const items = block.content.split('\n').filter(l => l.trim());
+            return `
+                <div class="block block-list">
+                    <ul>${items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
+                </div>`;
+            
+        default:
+            return '';
+    }
+}
+
+function copyCommand(btn, blockId) {
+    const codeEl = document.querySelector(`code[data-block-id="${blockId}"]`);
+    if (!codeEl) return;
+    
+    const text = codeEl.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.textContent = '✅ Скопировано!';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.textContent = '📋 Копировать';
+        }, 2000);
+    }).catch(() => {
+        // Fallback для старых браузеров
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+        btn.textContent = '✅ Скопировано!';
+        setTimeout(() => btn.textContent = '📋 Копировать', 2000);
+    });
+}
+
+// ---------- Редактор статьи ----------
+function renderEditorView(container, breadcrumbs, headerActions) {
+    const article = state.articles.find(a => a.id === state.currentArticleId);
+    if (!article) { state.currentView = 'welcome'; renderMain(); return; }
+    
+    const cat = state.categories.find(c => c.id === article.categoryId);
+    
+    breadcrumbs.innerHTML = `
+        <span style="cursor:pointer" onclick="goHome()">🏠 Главная</span>
+        <span class="separator">/</span>
+        ${cat ? `<span style="cursor:pointer" onclick="openCategory('${cat.id}')">${cat.icon} ${escapeHtml(cat.name)}</span>
+        <span class="separator">/</span>` : ''}
+        <span class="current">✏️ Редактирование</span>`;
+    
+    headerActions.innerHTML = `
+        <button class="btn btn-secondary btn-sm" onclick="cancelEdit()">← Назад</button>
+        <button class="btn btn-success btn-sm" onclick="saveArticleFromEditor()">💾 Сохранить статью</button>`;
+    
+    container.innerHTML = `
+        <div class="article-editor">
+            <div class="editor-field">
+                <label>Заголовок статьи <span class="hint">обязательно</span></label>
+                <input type="text" id="editorTitle" class="editor-title-input" 
+                       value="${escapeHtml(article.title)}" placeholder="Название статьи...">
+            </div>
+            
+            <div class="editor-field">
+                <label>Краткое описание <span class="hint">показывается в списке статей</span></label>
+                <textarea id="editorDescription" rows="2" placeholder="О чём эта статья?">${escapeHtml(article.description)}</textarea>
+            </div>
+            
+            <div class="editor-row">
+                <div class="editor-field">
+                    <label>Статус</label>
+                    <select id="editorStatus">
+                        <option value="draft" ${article.status === 'draft' ? 'selected' : ''}>📝 Черновик</option>
+                        <option value="published" ${article.status === 'published' ? 'selected' : ''}>✅ Опубликовано</option>
+                    </select>
+                </div>
+                <div class="editor-field">
+                    <label>Теги <span class="hint">через запятую</span></label>
+                    <input type="text" id="editorTags" value="${escapeHtml(article.tags.join(', '))}" placeholder="сеть, ubuntu, аудио">
+                </div>
+            </div>
+            
+            <div class="blocks-editor">
+                <div class="blocks-editor-header">
+                    <h3>📦 Содержимое статьи</h3>
+                    <span style="font-size:0.8rem; color:var(--text-secondary);">${state.editingBlocks.length} блоков</span>
+                </div>
+                
+                <div id="blocksList"></div>
+                
+                <div class="add-block-menu">
+                    ${Object.entries(BLOCK_TYPES).map(([type, info]) => `
+                        <div class="add-block-option" onclick="addBlock('${type}')" title="${info.hint}">
+                            <span class="block-option-icon">${info.icon}</span>
+                            ${info.label}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div style="margin-top:2rem; display:flex; gap:0.75rem; justify-content:flex-end; padding-bottom:3rem;">
+                <button class="btn btn-secondary" onclick="cancelEdit()">Отмена</button>
+                <button class="btn btn-success" onclick="saveArticleFromEditor()">💾 Сохранить статью</button>
+            </div>
+        </div>`;
+    
+    renderEditorBlocks();
+}
+
+function cancelEdit() {
+    state.currentView = 'article';
+    renderMain();
+}
+
+// ---------- Результаты поиска ----------
+function renderSearchResults(container) {
+    const results = searchArticles();
+    
+    if (results.length === 0) {
+        container.innerHTML = `
+            <div class="search-results">
+                <h2>Результаты поиска: "${escapeHtml(state.searchQuery)}"</h2>
+                <div class="empty-state" style="height:auto; padding:3rem;">
+                    <div class="empty-state-icon">🔍</div>
+                    <h3>Ничего не найдено</h3>
+                    <p>Попробуйте изменить запрос или проверьте опечатки</p>
+                </div>
+            </div>`;
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="search-results">
+            <h2>Найдено: ${results.length}</h2>
+            ${results.map(r => `
+                <div class="search-result-item" onclick="openArticle('${r.article.id}')">
+                    <div class="search-result-title">${highlight(r.article.title)}</div>
+                    <div class="search-result-category">
+                        ${r.category ? `${r.category.icon} ${escapeHtml(r.category.name)}` : 'Без категории'} 
+                        · <span class="status-badge ${r.article.status}" style="font-size:0.7rem;">${r.article.status === 'published' ? 'Опубликовано' : 'Черновик'}</span>
+                    </div>
+                    ${r.snippet ? `<div class="search-result-snippet">${highlight(r.snippet)}</div>` : ''}
+                    ${r.article.tags.length ? `<div style="margin-top:0.5rem;">${r.article.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</div>` : ''}
+                </div>
+            `).join('')}
+        </div>`;
+}
+
+function highlight(text) {
+    if (!state.searchQuery) return escapeHtml(text);
+    const escaped = escapeHtml(text);
+    const regex = new RegExp(`(${state.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return escaped.replace(regex, '<mark>$1</mark>');
+}
+
+// ============================================================
+// НАВИГАЦИЯ
+// ============================================================
+function goHome() {
+    state.currentView = 'welcome';
+    state.currentCategoryId = null;
+    state.currentArticleId = null;
+    state.searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    renderSidebar();
+    renderMain();
+}
+
+// ============================================================
+// ЭКСПОРТ / ИМПОРТ
+// ============================================================
+function exportData() {
+    const data = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        categories: state.categories,
+        articles: state.articles
+    };
+    
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `knowledge-base-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Данные экспортированы');
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!data.categories || !data.articles) {
+                throw new Error('Неверный формат файла');
+            }
+            
+            if (!confirm('Импорт заменит все текущие данные. Продолжить?')) return;
+            
+            state.categories = data.categories;
+            state.articles = data.articles;
+            state.currentView = 'welcome';
+            state.currentCategoryId = null;
+            state.currentArticleId = null;
+            
+            saveData();
+            renderSidebar();
+            renderMain();
+            showToast('Данные импортированы');
+        } catch (err) {
+            showToast('Ошибка импорта: ' + err.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+function showStats() {
+    const totalArticles = state.articles.length;
+    const published = state.articles.filter(a => a.status === 'published').length;
+    const drafts = totalArticles - published;
+    const totalBlocks = state.articles.reduce((sum, a) => sum + a.blocks.length, 0);
+    const totalTags = new Set(state.articles.flatMap(a => a.tags)).size;
+    
+    alert(`📊 Статистика базы знаний:\n
+📁 Категорий: ${state.categories.length}
+📄 Статей: ${totalArticles}
+   ✅ Опубликовано: ${published}
+   📝 Черновиков: ${drafts}
+🧱 Блоков контента: ${totalBlocks}
+🏷️ Уникальных тегов: ${totalTags}`);
+}
+
+// ============================================================
+// МОДАЛЬНЫЕ ОКНА
+// ============================================================
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+window.onclick = function(event) {
+    if (event.target.classList && event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+    }
+};
+
+// Горячие клавиши
+document.addEventListener('keydown', function(e) {
+    // Ctrl+S — сохранить в редакторе
+    if ((e.ctrlKey || e.metaKey) && e.key === 's' && state.currentView === 'editor') {
+        e.preventDefault();
+        saveArticleFromEditor();
+    }
+    // Ctrl+F — фокус на поиск
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f' && !e.target.closest('.editor-block')) {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+    }
+    // Escape — закрыть модалку
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+    }
+});
+
+// ============================================================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    loadData();
+    renderSidebar();
+    renderMain();
+});
+</script>
+</body>
+</html>
