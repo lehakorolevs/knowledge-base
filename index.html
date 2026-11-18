@@ -102,6 +102,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .b-list li{padding:.45rem 0 .45rem 1.6rem;position:relative;border-bottom:1px solid var(--border)}
 .b-list li:last-child{border-bottom:none}
 .b-list li::before{content:'▸';position:absolute;left:.4rem;color:var(--primary);font-weight:700}
+/* ═══ ТАБЛИЦА: ПРОСМОТР ═══ */
+.b-table{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
+.b-table table{width:100%;border-collapse:collapse;font-size:.9rem}
+.b-table th{background:var(--primary);color:#fff;padding:.6rem .9rem;text-align:left;font-weight:600;white-space:nowrap}
+.b-table td{padding:.6rem .9rem;border-top:1px solid var(--border);vertical-align:top}
+.b-table tbody tr:nth-child(even) td{background:var(--bg)}
+.b-table code{background:#f1f5f9;color:#dc2626;padding:.1rem .35rem;border-radius:4px;font-family:Consolas,monospace;font-size:.85em;white-space:nowrap}
+/* ═══ ТАБЛИЦА: РЕДАКТОР-СЕТКА ═══ */
+.tbl-create{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;padding:.5rem 0}
+.tbl-create label{font-size:.82rem;color:var(--text2);display:flex;align-items:center;gap:.4rem}
+.tbl-create input{width:70px;padding:.45rem .5rem;border:1px solid var(--border);border-radius:6px;font-size:.9rem}
+.tbl-create input:focus{outline:none;border-color:var(--primary)}
+.tbl-edit{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+.tbl-edit table{border-collapse:collapse;width:100%}
+.tbl-edit th,.tbl-edit td{border:1px solid var(--border);padding:0;margin:0}
+.tbl-edit input{width:100%;min-width:110px;border:none;padding:.55rem .65rem;font-size:.85rem;font-family:inherit;background:#fff}
+.tbl-edit input:focus{outline:2px solid var(--primary);outline-offset:-2px;background:#fff}
+.tbl-edit thead input{background:var(--primary);color:#fff;font-weight:600}
+.tbl-edit thead input::placeholder{color:rgba(255,255,255,.65)}
+.tbl-edit tbody tr:nth-child(even) input{background:var(--bg)}
+.tbl-edit tbody tr:nth-child(even) input:focus{background:#fff}
+.tbl-controls{display:flex;gap:.4rem;margin-top:.6rem;flex-wrap:wrap;align-items:center}
+.tbl-hint{font-size:.73rem;color:var(--text2)}
 .editor-field{margin-bottom:1.25rem}
 .editor-field label{display:flex;justify-content:space-between;font-weight:600;font-size:.82rem;margin-bottom:.4rem}
 .editor-field .hint{font-weight:400;color:var(--text2);font-size:.73rem}
@@ -122,6 +145,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .bt-badge.info{background:#dbeafe;color:#1e40af}
 .bt-badge.success{background:#d1fae5;color:#065f46}
 .bt-badge.list{background:#fce7f3;color:#9d174d}
+.bt-badge.table{background:#e0e7ff;color:#3730a3}
 .ed-block-body{padding:.85rem}
 .ed-block-body textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:.7rem;font-family:inherit;font-size:.9rem;min-height:75px;resize:vertical}
 .ed-block-body textarea.code{font-family:Consolas,monospace;background:#1e293b;color:#e2e8f0;border-color:#334155}
@@ -261,7 +285,7 @@ const SCOPES = 'https://www.googleapis.com/auth/drive';
 const FILE_NAME = 'knowledge-base.json';
 const LS_KEY = 'kb_cache_v2', LS_CFG = 'kb_config_v2';
 const EMOJIS=['📁','🖥️','🌐','🔧','🔐','📷','🎤','💾','📋','⚙️','🐛','📖','🚀','💡','🔌','🖨️','📡','🗄️'];
-const BT={heading:{l:'Заголовок',i:'🔤'},paragraph:{l:'Текст',i:'📝'},command:{l:'Команда',i:'💻'},warning:{l:'Внимание',i:'⚠️'},info:{l:'Инфо',i:'ℹ️'},success:{l:'Совет',i:'✅'},list:{l:'Список',i:'📋'}};
+const BT={heading:{l:'Заголовок',i:'🔤'},paragraph:{l:'Текст',i:'📝'},command:{l:'Команда',i:'💻'},warning:{l:'Внимание',i:'⚠️'},info:{l:'Инфо',i:'ℹ️'},success:{l:'Совет',i:'✅'},list:{l:'Список',i:'📋'},table:{l:'Таблица',i:'📊'}};
 
 let cfg={fileId:'',poll:15};
 let db={categories:[],articles:[]};
@@ -271,6 +295,7 @@ let g={token:null,tokenClient:null,user:null,rev:null,pollTimer:null,dirty:false
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const now=()=>new Date().toISOString();
 const esc=t=>{if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML};
+const escAttr=t=>esc(t).replace(/"/g,'&quot;');
 const fmt=iso=>iso?new Date(iso).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
 const cats=()=>db.categories.filter(c=>!c.deleted);
 const arts=()=>db.articles.filter(a=>!a.deleted);
@@ -499,7 +524,7 @@ function saveArticle(){
   a.description=document.getElementById('edDesc').value.trim();
   a.status=document.getElementById('edStatus').value;
   a.tags=document.getElementById('edTags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  a.blocks=ui.blocks.filter(b=>b.content.trim());
+  a.blocks=ui.blocks.filter(b=>b.type==='table'?true:(b.content||'').trim());
   a.updatedAt=now();a.editor=g.user?.email;
   ui.view='article';renderSidebar();renderMain();markDirty();toast('Статья сохранена — отправляется коллегам');
 }
@@ -509,10 +534,21 @@ function addBlock(type){ui.blocks.push({id:uid(),type,content:''});renderBlocks(
 function updBlock(id,v){const b=ui.blocks.find(x=>x.id===id);if(b)b.content=v}
 function delBlock(id){ui.blocks=ui.blocks.filter(x=>x.id!==id);renderBlocks()}
 function moveBlock(id,d){const i=ui.blocks.findIndex(x=>x.id===id);if(i<0)return;const j=i+d;if(j<0||j>=ui.blocks.length)return;[ui.blocks[i],ui.blocks[j]]=[ui.blocks[j],ui.blocks[i]];renderBlocks()}
+
+/* ═══════════ ТАБЛИЦЫ: СЕТКА ═══════════ */
+function splitRow(line){const out=[];let cur='';for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='\\'&&line[i+1]==='|'){cur+='|';i++}else if(ch==='|'){out.push(cur);cur=''}else cur+=ch}out.push(cur);return out.map(s=>s.trim())}
+function parseTableGrid(content){if(!content||!content.trim())return[];const rows=content.split('\n').filter(l=>l.trim()!=='').map(splitRow);if(!rows.length)return[];const cols=Math.max(...rows.map(r=>r.length));rows.forEach(r=>{while(r.length<cols)r.push('')});return rows}
+function serializeGrid(grid){return grid.map(r=>r.map(c=>c.replace(/\|/g,'\\|')).join(' | ')).join('\n')}
+function createTableGrid(id){const b=ui.blocks.find(x=>x.id===id);if(!b)return;const ce=document.getElementById('tcols-'+id),re=document.getElementById('trows-'+id);const cols=Math.max(1,Math.min(12,+(ce?ce.value:3)||3));const rows=Math.max(2,Math.min(60,+(re?re.value:4)||4));const grid=Array.from({length:rows},()=>Array(cols).fill(''));b.content=serializeGrid(grid);renderBlocks()}
+function updCell(id,ri,ci,v){const b=ui.blocks.find(x=>x.id===id);if(!b)return;const grid=parseTableGrid(b.content);if(!grid[ri])return;grid[ri][ci]=v;b.content=serializeGrid(grid)}
+function addRow(id){const b=ui.blocks.find(x=>x.id===id);if(!b)return;const grid=parseTableGrid(b.content);if(!grid.length)return;grid.push(Array(grid[0].length).fill(''));b.content=serializeGrid(grid);renderBlocks()}
+function delRow(id){const b=ui.blocks.find(x=>x.id===id);if(!b)return;const grid=parseTableGrid(b.content);if(grid.length<=2){toast('В таблице должны остаться шапка и хотя бы одна строка','warn');return}grid.pop();b.content=serializeGrid(grid);renderBlocks()}
+function addCol(id){const b=ui.blocks.find(x=>x.id===id);if(!b)return;const grid=parseTableGrid(b.content);if(!grid.length)return;grid.forEach(r=>r.push(''));b.content=serializeGrid(grid);renderBlocks()}
+function delCol(id){const b=ui.blocks.find(x=>x.id===id);if(!b)return;const grid=parseTableGrid(b.content);if(!grid.length)return;if(grid[0].length<=1){toast('Нельзя удалить последний столбец','warn');return}grid.forEach(r=>r.pop());b.content=serializeGrid(grid);renderBlocks()}
+
 function renderBlocks(){
   const c=document.getElementById('blocksList');if(!c)return;
   if(!ui.blocks.length){c.innerHTML='<div style="text-align:center;padding:1.75rem;color:var(--text2);background:var(--bg);border-radius:8px;border:2px dashed var(--border)"><div style="font-size:1.75rem;margin-bottom:.4rem">📭</div>Добавьте первый блок ниже</div>';return}
-  const ph={heading:'Текст заголовка…',paragraph:'Введите текст…',command:'sudo apt update\nsudo apt install …',warning:'Текст предупреждения…',info:'Полезная информация…',success:'Совет…',list:'Первый пункт\nВторой пункт'};
   c.innerHTML=ui.blocks.map((b,i)=>`<div class="ed-block">
     <div class="ed-block-head"><span class="bt-badge ${b.type}">${BT[b.type].i} ${BT[b.type].l}</span>
     <div class="b-ctrl">
@@ -520,8 +556,40 @@ function renderBlocks(){
       <button onclick="moveBlock('${b.id}',1)" ${i===ui.blocks.length-1?'disabled style="opacity:.3"':''}>↓</button>
       <button class="dg" onclick="delBlock('${b.id}')">🗑️</button>
     </div></div>
-    <div class="ed-block-body"><textarea class="${b.type==='command'?'code':''}" placeholder="${ph[b.type]}" oninput="updBlock('${b.id}',this.value)">${esc(b.content)}</textarea></div>
+    <div class="ed-block-body">${blockEditorBody(b)}</div>
   </div>`).join('');
+}
+
+function blockEditorBody(b){
+  if(b.type==='table'){
+    const grid=parseTableGrid(b.content);
+    if(!grid.length){
+      return `<div class="tbl-create">
+        <span style="font-size:.85rem;font-weight:600">Размер таблицы:</span>
+        <label>Столбцов <input type="number" id="tcols-${b.id}" min="1" max="12" value="3"></label>
+        <label>Строк <input type="number" id="trows-${b.id}" min="2" max="60" value="4"></label>
+        <button class="btn btn-primary btn-sm" onclick="createTableGrid('${b.id}')">📊 Создать таблицу</button>
+        <span class="tbl-hint">Строк = шапка + строки данных</span>
+      </div>`;
+    }
+    let html='<div class="tbl-edit"><table><thead><tr>';
+    html+=grid[0].map((cc,ci)=>`<th><input value="${escAttr(cc)}" placeholder="Столбец ${ci+1}" oninput="updCell('${b.id}',0,${ci},this.value)"></th>`).join('');
+    html+='</tr></thead><tbody>';
+    for(let ri=1;ri<grid.length;ri++){
+      html+='<tr>'+grid[ri].map((cc,ci)=>`<td><input value="${escAttr(cc)}" placeholder="—" oninput="updCell('${b.id}',${ri},${ci},this.value)"></td>`).join('')+'</tr>';
+    }
+    html+='</tbody></table></div>';
+    html+=`<div class="tbl-controls">
+      <button class="btn btn-secondary btn-sm" onclick="addRow('${b.id}')">＋ строка</button>
+      <button class="btn btn-secondary btn-sm" onclick="delRow('${b.id}')">－ строка</button>
+      <button class="btn btn-secondary btn-sm" onclick="addCol('${b.id}')">＋ столбец</button>
+      <button class="btn btn-secondary btn-sm" onclick="delCol('${b.id}')">－ столбец</button>
+      <span class="tbl-hint">Первая строка — шапка. Текст в обратных кавычках станет код-чипом.</span>
+    </div>`;
+    return html;
+  }
+  const ph={heading:'Текст заголовка…',paragraph:'Введите текст…',command:'sudo apt update\nsudo apt install …',warning:'Текст предупреждения…',info:'Полезная информация…',success:'Совет…',list:'Первый пункт\nВторой пункт'}[b.type]||'';
+  return `<textarea class="${b.type==='command'?'code':''}" placeholder="${ph}" oninput="updBlock('${b.id}',this.value)">${esc(b.content)}</textarea>`;
 }
 
 /* ═══════════ ПОИСК ═══════════ */
@@ -609,6 +677,13 @@ function renderArtView(c,bc,ha){
     <div class="art-meta">${(a.tags||[]).length?`<div>${a.tags.map(t=>`<span class="tag">🏷️ ${esc(t)}</span>`).join(' ')}</div>`:''}<span>🕐 ${fmt(a.updatedAt)}</span>${a.editor?`<span>👤 ${esc(a.editor)}</span>`:''}</div>
   </div>${(a.blocks||[]).length?a.blocks.map(blockView).join(''):'<div class="empty-state" style="height:auto;padding:2.5rem"><div class="empty-icon">📭</div><p>Статья пустая. Нажмите «Редактировать».</p></div>'}</div>`;
 }
+function cellFmt(t){return esc(t).replace(/`([^`]+)`/g,'<code>$1</code>')}
+function tableHtml(content){
+  const rows=parseTableGrid(content).filter(r=>r.some(cc=>cc!==''));
+  if(!rows.length)return'';
+  const head=rows[0],body=rows.slice(1);
+  return `<table><thead><tr>${head.map(h=>`<th>${cellFmt(h)}</th>`).join('')}</tr></thead>${body.length?`<tbody>${body.map(r=>`<tr>${r.map(cc=>`<td>${cellFmt(cc)}</td>`).join('')}</tr>`).join('')}</tbody>`:''}</table>`;
+}
 function blockView(b){
   const t=esc(b.content);
   switch(b.type){
@@ -619,6 +694,7 @@ function blockView(b){
     case'info':return `<div class="block b-info"><span>ℹ️</span><div class="alert-c">${t}</div></div>`;
     case'success':return `<div class="block b-ok"><span>✅</span><div class="alert-c">${t}</div></div>`;
     case'list':return `<div class="block b-list"><ul>${b.content.split('\n').filter(l=>l.trim()).map(l=>`<li>${esc(l)}</li>`).join('')}</ul></div>`;
+    case'table':return `<div class="block b-table">${tableHtml(b.content)}</div>`;
     default:return'';
   }
 }
