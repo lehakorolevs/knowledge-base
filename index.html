@@ -102,14 +102,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .b-list li{padding:.45rem 0 .45rem 1.6rem;position:relative;border-bottom:1px solid var(--border)}
 .b-list li:last-child{border-bottom:none}
 .b-list li::before{content:'▸';position:absolute;left:.4rem;color:var(--primary);font-weight:700}
-/* ═══ ТАБЛИЦА: ПРОСМОТР ═══ */
 .b-table{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
 .b-table table{width:100%;border-collapse:collapse;font-size:.9rem}
 .b-table th{background:var(--primary);color:#fff;padding:.6rem .9rem;text-align:left;font-weight:600;white-space:nowrap}
 .b-table td{padding:.6rem .9rem;border-top:1px solid var(--border);vertical-align:top}
 .b-table tbody tr:nth-child(even) td{background:var(--bg)}
 .b-table code{background:#f1f5f9;color:#dc2626;padding:.1rem .35rem;border-radius:4px;font-family:Consolas,monospace;font-size:.85em;white-space:nowrap}
-/* ═══ ТАБЛИЦА: РЕДАКТОР-СЕТКА ═══ */
 .tbl-create{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;padding:.5rem 0}
 .tbl-create label{font-size:.82rem;color:var(--text2);display:flex;align-items:center;gap:.4rem}
 .tbl-create input{width:70px;padding:.45rem .5rem;border:1px solid var(--border);border-radius:6px;font-size:.9rem}
@@ -125,7 +123,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .tbl-edit tbody tr:nth-child(even) input:focus{background:#fff}
 .tbl-controls{display:flex;gap:.4rem;margin-top:.6rem;flex-wrap:wrap;align-items:center}
 .tbl-hint{font-size:.73rem;color:var(--text2)}
-/* ═══ ИЗОБРАЖЕНИЯ ═══ */
 .img-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;color:var(--text2);font-size:.85rem;cursor:pointer;transition:all .2s;background:var(--bg)}
 .img-drop:hover,.img-drop.over{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
 .img-drop .big{font-size:1.6rem;display:block;margin-bottom:.3rem}
@@ -138,7 +135,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .b-img figcaption{text-align:center;color:var(--text2);font-size:.82rem;margin-top:.5rem;font-style:italic}
 .img-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:3000;display:flex;align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
 .img-lightbox img{max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
-/* ═══ РЕДАКТОР ═══ */
 .editor-field{margin-bottom:1.25rem}
 .editor-field label{display:flex;justify-content:space-between;font-weight:600;font-size:.82rem;margin-bottom:.4rem}
 .editor-field .hint{font-weight:400;color:var(--text2);font-size:.73rem}
@@ -281,6 +277,11 @@ mark{background:#fef08a;padding:0 2px;border-radius:2px}
     <label>Интервал синхронизации (секунды)</label>
     <select id="pollInterval"><option value="10">10 сек</option><option value="15" selected>15 сек</option><option value="30">30 сек</option><option value="60">60 сек</option></select>
   </div>
+  <div class="editor-field">
+    <label>Справочник</label>
+    <button class="btn btn-secondary btn-sm" onclick="loadPercoPack()">📥 Добавить инструкцию «Первичная настройка ПО»</button>
+    <div style="font-size:.75rem;color:var(--text2);margin-top:.4rem">Зальёт категории и статьи из документа PERCo в общую базу (повторно не дублирует)</div>
+  </div>
   <div id="shareBlock" style="display:none" class="setup-note">
     <strong>📤 Как дать доступ коллегам:</strong><br>
     1. Откройте <a href="https://drive.google.com" target="_blank">Google Drive</a><br>
@@ -301,6 +302,105 @@ const FILE_NAME = 'knowledge-base.json';
 const LS_KEY = 'kb_cache_v2', LS_CFG = 'kb_config_v2';
 const EMOJIS=['📁','🖥️','🌐','🔧','🔐','📷','🎤','💾','📋','⚙️','🐛','📖','🚀','💡','🔌','🖨️','📡','🗄️'];
 const BT={heading:{l:'Заголовок',i:'🔤'},paragraph:{l:'Текст',i:'📝'},command:{l:'Команда',i:'💻'},warning:{l:'Внимание',i:'⚠️'},info:{l:'Инфо',i:'ℹ️'},success:{l:'Совет',i:'✅'},list:{l:'Список',i:'📋'},table:{l:'Таблица',i:'📊'},image:{l:'Картинка',i:'🖼️'}};
+
+/* ═══════════ СПРАВОЧНИК ИЗ ДОКУМЕНТА PERCo ═══════════ */
+const PERCO_PACK={categories:[
+{id:'pk-server',name:'Сервер и ОС',icon:'🖥️'},
+{id:'pk-network',name:'Сетевые настройки',icon:'🌐'},
+{id:'pk-disks',name:'Диски и файлы',icon:'💾'},
+{id:'pk-soft',name:'Установка и обновление ПО',icon:'📦'},
+{id:'pk-audio',name:'Аудио',icon:'🎤'},
+{id:'pk-cam',name:'Камеры',icon:'📷'},
+{id:'pk-orange',name:'Orange Pi и устройства',icon:'🔧'},
+{id:'pk-pass',name:'Пароли',icon:'🔐'},
+{id:'pk-cmd',name:'Полезные команды',icon:'🛠️'}],
+articles:[
+{id:'pk-os',categoryId:'pk-server',title:'Установка Ubuntu Server',description:'Требования и шаги установки ОС',tags:['ubuntu','установка'],status:'published',blocks:[
+ {type:'warning',content:'Ubuntu Server 22.04 или выше — обязательно БЕЗ графической оболочки, иначе GUI и ПО делят ресурсы и установка завершается ошибкой.'},
+ {type:'table',content:'Параметр | Значение | Пояснение\nSubnet | `172.17.0.0/16` | Маска сети роутера\nAddress | `172.17.2.49` | IP роутера сети с доступом в интернет\nGateway | `172.17.0.228` | Шлюз сети\nName Servers | `172.16.5.80, 8.8.8.8, 8.8.4.4` | Адрес сервера и DNS Google'},
+ {type:'list',content:'Proxy — пропускаем\nSet LVM — убрать галочку (нажать пробел)\nInstall SSH — выбрать галочку'},
+ {type:'paragraph',content:'После перезагрузки удалить загрузочную флеш-карту из USB-слота. По загрузке сервера ввести login и password, заданные при первичной настройке.'}]},
+{id:'pk-dw',categoryId:'pk-server',title:'DWService — удалённый доступ',description:'Установка агента на сервер Linux',tags:['dwservice','доступ'],status:'published',blocks:[
+ {type:'paragraph',content:'Удалённый доступ к серверам через браузер: https://www.dwservice.net'},
+ {type:'command',content:'wget https://www.dwservice.net/download/dwagent.sh\nchmod +x dwagent.sh\nsudo ./dwagent.sh'}]},
+{id:'pk-time',categoryId:'pk-server',title:'Дата, время и NTP',description:'Настройка времени на сервере и устройствах',tags:['ntp','время'],status:'published',blocks:[
+ {type:'warning',content:'Перед обновлением ПО обязательно установите текущие дату и время.'},
+ {type:'command',content:'sudo timedatectl set-timezone Europe/Moscow\nsudo timedatectl set-ntp true   # автоматическая синхронизация (NTP)\nsudo date 050809402026          # установить 08 Мая 2026 09:40\nsudo date -s "2026-06-30 15:55:00"   # альтернативная команда\ntimedatectl                     # проверка NTP'},
+ {type:'paragraph',content:'Настройка NTP на устройствах: сначала ремаунтим систему в rw, настраиваем, ремаунтим обратно.'},
+ {type:'command',content:'sudo mount -o remount,rw /\nsudo sed -i -E \'s/^(pool|server) /#&/\' /etc/chrony/chrony.conf && echo "server 192.168.79.1 iburst" | sudo tee -a /etc/chrony/chrony.conf && sudo systemctl restart chrony\nsudo mount -o remount,ro /'}]},
+{id:'pk-nvidia',categoryId:'pk-server',title:'Видеодрайвер NVIDIA',description:'Установка и переустановка драйвера',tags:['nvidia','драйвер'],status:'published',blocks:[
+ {type:'command',content:'sudo apt update\nnvidia-smi   # покажет установленный драйвер (если есть)\nsudo apt install nvidia-driver-595\nsudo reboot'},
+ {type:'paragraph',content:'Переустановка драйвера на Ubuntu:'},
+ {type:'command',content:'sudo apt purge -y \'nvidia*\' \'libnvidia*\'\nsudo apt autoremove -y\nsudo ubuntu-drivers autoinstall\nsudo reboot'}]},
+{id:'pk-netplan',categoryId:'pk-network',title:'Netplan: сервер и паркомат',description:'Сетевые конфиги устройств',tags:['netplan','сеть'],status:'published',blocks:[
+ {type:'warning',content:'Все .yaml файлы чувствительны к пробелам и синтаксису!'},
+ {type:'paragraph',content:'Сервер: sudo nano /etc/netplan/50-cloud-init.yaml'},
+ {type:'command',content:'network:\n  version: 2\n  ethernets:\n      enp4s0:\n        addresses:\n        - "172.17.28.201/16"\n        nameservers:\n          addresses:\n          - 172.17.0.193\n          - 8.8.8.8\n          - 8.8.4.4\n          search: []\n        routes:\n        - to: "default"\n          via: "172.17.0.228"'},
+ {type:'paragraph',content:'Паркомат: sudo nano /etc/netplan/01-network-manager-all.yaml'},
+ {type:'command',content:'network:\n  version: 2\n  renderer: networkd\n  ethernets:\n    eth0:\n      dhcp4: false\n  bridges:\n    br0:\n      interfaces: [eth0]\n      addresses:\n        - 172.17.28.210/16\n      routes:\n        - to: 0.0.0.0/0\n          via: 172.17.0.228'},
+ {type:'info',content:'Сетевые настройки на стойках хранятся в /etc/network/interfaces'}]},
+{id:'pk-env',categoryId:'pk-network',title:'Переменные окружения и адрес сервера',description:'/etc/environment и старые конфиги',tags:['env','perco_serv'],status:'published',blocks:[
+ {type:'paragraph',content:'Адрес сервера в /etc/environment, переменная PERCO_SERV. Старый конфиг: /etc/systemd/system/cash.service — там есть строчка с perco_server, её правим на нужный IP.'},
+ {type:'command',content:'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"\nPERCO_SERV="172.16.5.80"\nPERCO_FRONTEND_PATH=/srv/www/cash-frontend'}]},
+{id:'pk-gitperco',categoryId:'pk-network',title:'Проверка доступности git.perco.ru',description:'nslookup, telnet, /etc/hosts',tags:['git','perco'],status:'published',blocks:[
+ {type:'command',content:'nslookup git.perco.ru      # должно показать 80.246.244.254 первым\ntelnet 80.246.244.254 5050  # извне сети ПЭРКо\ntelnet 172.17.15.77 5050    # внутри сети ПЭРКо, ожидается: Escape character is \'^]\'\necho "172.17.15.77 git.perco.ru" | sudo tee -a /etc/hosts   # принудительное перенаправление (только внутри сети PERCo)'}]},
+{id:'pk-hdd',categoryId:'pk-disks',title:'HDD для медиа и очистка',description:'Монтирование и удаление старых файлов',tags:['hdd','очистка'],status:'published',blocks:[
+ {type:'paragraph',content:'Монтировать отдельный диск в папку /home/user/storage/file-storage — расположение файлов.'},
+ {type:'command',content:'sudo du -sh */   # -s итоговый размер, -h человекочитаемый формат (K, M, G)\nsudo find ~/storage/file-storage/plates/ -type f -mtime +60 -delete\nsudo find ~/storage/file-storage/snapshots/ -type f -mtime +60 -delete'}]},
+{id:'pk-lvm',categoryId:'pk-disks',title:'Увеличение LVM диска',description:'Расширение логического тома',tags:['lvm','диск'],status:'published',blocks:[
+ {type:'command',content:'df -h /   # проверка свободного пространства\nsudo lvextend -l +100%FREE -r /dev/ubuntu-vg/ubuntu-lv'},
+ {type:'paragraph',content:'Расширяет логический том на весь доступный объём диска вместе с файловой системой (ext4 или xfs — утилита определит сама).'}]},
+{id:'pk-install',categoryId:'pk-soft',title:'Установка ПО — install.sh',description:'Распаковка архива и права',tags:['установка','install'],status:'published',blocks:[
+ {type:'command',content:'tar -xzvf perco-parking-1.6.хх.tar.gz\nchmod -R 777 perco-parking-1.6.хх'},
+ {type:'info',content:'Файлики настроек фискальных данных: на паркомате и на стойке выезда положить fiscal_data в /usr/local'}]},
+{id:'pk-update',categoryId:'pk-soft',title:'Обновление ПО и microk8s',description:'update.sh, бэкап, версии, перезапуск',tags:['обновление','microk8s'],status:'published',blocks:[
+ {type:'warning',content:'Бэкап всегда делается с запущенным сервером старой версии, до 1.6.10, где нужны миграции данных. В остальных случаях это не нужно.'},
+ {type:'info',content:'Если IP у сервера менялся, это может быть причиной проблем при установке: конфигурация microk8s была сгенерирована для старого адреса.'},
+ {type:'command',content:'microk8s helm list -A | grep -oP \'local-server-\\K[0-9.]+\'        # версия сервера\nmicrok8s helm list -A | awk \'/local-server/ {print $4, $5}\' | cut -d\'.\' -f1   # дата и время обновления\nmicrok8s stop\nmicrok8s start   # перезапустить весь кластер'}]},
+{id:'pk-updater',categoryId:'pk-soft',title:'Обновление устройств — updater.sh',description:'Синтаксис команды обновления',tags:['updater','устройства'],status:'published',blocks:[
+ {type:'paragraph',content:'Распаковать device-updater-1.6.53.tar.gz'},
+ {type:'command',content:'./updater.sh <in|out|cash> <ip_устройства> [ip_сервера] [-u пользователь] [-p пароль] [--dry-run]\n./updater.sh in 172.17.5.213 172.17.5.202   # пример'},
+ {type:'list',content:'in|out|cash — тип устройства\nip_устройства — IP-адрес целевого устройства\nip_сервера — значение PERCO_SERV (если не указан — определяется автоматически по локальному IP)'}]},
+{id:'pk-audio-base',categoryId:'pk-audio',title:'Базовая проверка звука',description:'alsamixer, pactl, aplay',tags:['аудио','проверка'],status:'published',blocks:[
+ {type:'command',content:'alsamixer    # проверять и увеличивать громкость динамиков до 100%\npactl info   # какое аудио-устройство используется для вывода и ввода\naplay -l     # видит ли система звуковую карту\naplay -D hw:0,0 ~/bachfugue.wav   # проверить звук на паркомате\npactl set-sink-volume @DEFAULT_SINK@ 70%   # установка громкости'}]},
+{id:'pk-audio-no',categoryId:'pk-audio',title:'Если звука нет — IEC958 (HDMI)',description:'Переключение на аналоговый выход',tags:['аудио','hdmi'],status:'published',blocks:[
+ {type:'paragraph',content:'Проверить в /var/lib/alsa/asound.state параметр IEC958,1 (цифровой выход HDMI) — должен быть [off]. Если [on]:'},
+ {type:'command',content:'pactl set-card-profile alsa_card.pci-0000_00_1f.3 output:analog-stereo\namixer -c 0 set \'IEC958\',1 mute\nsudo alsactl store\npactl set-default-sink alsa_output.pci-0000_00_1f.3.analog-stereo'},
+ {type:'info',content:'Шаг 1 выключает скрытые профили output:hdmi-..., шаг 3 фиксирует конфигурацию, чтобы не вернулась после перезагрузки.'}]},
+{id:'pk-usb-mic',categoryId:'pk-audio',title:'USB-микрофон Generalplus (1b3f:2008)',description:'Микрофон перетягивает выход звука',tags:['микрофон','usb'],status:'published',blocks:[
+ {type:'paragraph',content:'Определяется в системе как микрофон + колонки, перетягивает на себя выход звука — основные колонки молчат. Для работы основных колонок настроить их как дефолтные:'},
+ {type:'command',content:'pactl set-default-sink alsa_output.platform-sound_ac200.stereo-fallback\npactl list short sinks    # список доступных колонок\npactl list short sources  # список источников (микрофонов)'}]},
+{id:'pk-vol130',categoryId:'pk-audio',title:'Громкость 130% на терминалах PERCo',description:'Закрепление переусиления в default.pa',tags:['громкость','orange pi'],status:'published',blocks:[
+ {type:'command',content:'sudo mount -o remount,rw /    # если overlayroot: sudo overlayroot-chroot\nsudo nano /etc/pulse/default.pa'},
+ {type:'paragraph',content:'Прокрутите файл в самый низ и вставьте строку:'},
+ {type:'command',content:'set-sink-volume alsa_output.platform-sound_ac200.stereo-fallback 85197'},
+ {type:'info',content:'Число 85197 — программный эквивалент 130% громкости (+6.84 dB). Сохранить: Ctrl+O, Enter; выход: Ctrl+X.'}]},
+{id:'pk-mic-err',categoryId:'pk-audio',title:'Ошибка «Нет доступа к микрофону» (паркомат)',description:'Лечение сломанных user units PulseAudio',tags:['микрофон','pulseaudio'],status:'published',blocks:[
+ {type:'command',content:'systemctl --user stop pulseaudio.service pulseaudio.socket\nsystemctl --user disable pulseaudio.service pulseaudio.socket\nsystemctl --user reset-failed\nrm -rf ~/.config/pulse\nrm -rf ~/.pulse\nsudo reboot'},
+ {type:'paragraph',content:'После входа проверить: systemctl --user status pulseaudio; pactl info; arecord -l. Восстановление permissions: sudo chown -R $USER:$USER ~/.config; chmod 700 ~/.config.'},
+ {type:'command',content:'parecord --device="$(pactl get-default-source)" test.wav\naplay test.wav'}]},
+{id:'pk-chromium',categoryId:'pk-audio',title:'Chromium — доступ к аудио',description:'Snap-подключения браузера',tags:['chromium','snap'],status:'published',blocks:[
+ {type:'command',content:'sudo snap connect chromium:audio-playback\nsudo snap connect chromium:audio-record\nsudo snap connect chromium:pulseaudio'}]},
+{id:'pk-cam-setup',categoryId:'pk-cam',title:'Настройка камер (CMS)',description:'Кодек, дата, проверка потока',tags:['камеры','cms'],status:'published',blocks:[
+ {type:'paragraph',content:'Программа CMS: https://www.cctvsp.ru/support/cms ; видеоинструкция: https://youtu.be/IEO3hrtXgLI'},
+ {type:'list',content:'Выключить галочку смены IP при перезагрузках\nУстановить корректные дату, время, наименование\nПереключить кодек с H.265 на H.265x (так называется H.264)'},
+ {type:'command',content:'curl --digest http://admin:Admin3@10.10.43.160/ISAPI/Streaming/Channels/101/picture > test.jpg\nrtsp://admin:PercoParking@172.17.5.212:554/Streaming/Channels/1/'}]},
+{id:'pk-readonly',categoryId:'pk-orange',title:'Ошибка Read-only file system',description:'Ремаунт и проверка fstab',tags:['orange pi','fstab'],status:'published',blocks:[
+ {type:'command',content:'sudo mount -o remount,rw /'},
+ {type:'paragraph',content:'Если проблема сохраняется после перезагрузки: sudo nano /etc/fstab — убедитесь, что для корневого раздела (/) в четвёртом поле нет параметра ro — должно быть rw или просто опции без ro.'}]},
+{id:'pk-i2c',categoryId:'pk-orange',title:'I2C — проверка платы ввода/вывода',description:'i2cdetect на Orange Pi',tags:['i2c','orange pi'],status:'published',blocks:[
+ {type:'paragraph',content:'На Orange Pi используется шина i2c-0. Исправный ответ — адрес 58 в строке 50:'},
+ {type:'command',content:'/usr/sbin/i2cdetect -y 0\n#  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n# 50: -- -- -- -- -- -- -- -- 58 -- -- -- -- -- -- --'}]},
+{id:'pk-pass-table',categoryId:'pk-pass',title:'Пароли по умолчанию',description:'Учётные данные всех устройств',tags:['пароли'],status:'published',blocks:[
+ {type:'table',content:'Устройство | Логин:Пароль | Примечание\nСтойки | `orangepi:orangepi` | С 1.7 с завода: `perco:PERCo`\nПаркоматы | `cash:PERCo` | Для старых: `123`\nСервер | `server:PERCo` | Для старых: `123`\nVendotek | `351` | Сервисный пароль'}]},
+{id:'pk-ssh',categoryId:'pk-cmd',title:'SSH: ключи и туннели',description:'Сброс ключа, проброс портов',tags:['ssh'],status:'published',blocks:[
+ {type:'command',content:'ssh-keygen -f "C:\\Users\\kas1\\.ssh\\known_hosts" -R 172.17.2.52   # сбросить ключ\nssh -L 3000:10.0.7.106:3000 user@10.0.7.101   # туннель к странице IP:3000'},
+ {type:'list',content:'Оставьте SSH-сессию открытой — туннель жив только пока работает соединение\nВ браузере откройте: http://localhost:3000 (или http://127.0.0.1:3000)'}]},
+{id:'pk-diag',categoryId:'pk-cmd',title:'Диагностика: устройства, подсеть, БД',description:'lshw, arp, mongosh, логи',tags:['диагностика'],status:'published',blocks:[
+ {type:'command',content:'sudo lshw -short   # список всех устройств (процессор, память, диски, сетевые платы)\ncat /proc/net/arp | grep 172.16.5   # список IP-адресов устройств в подсети\nk exec -it service/core-mongo-svc -- mongosh   # доступ к консоли БД'},
+ {type:'paragraph',content:'В консоли БД: use core; db.users.deleteMany({}) — удалить существующего пользователя.'},
+ {type:'paragraph',content:'Чтение логов со стойки: режим разработчика в браузере (F12), вкладки Console/Network.'}]}
+]};
 
 let cfg={fileId:'',poll:15};
 let db={categories:[],articles:[]};
@@ -484,6 +584,23 @@ function checkEditConflict(remote){
   }
 }
 
+/* ═══════════ ЗАЛИВКА СПРАВОЧНИКА PERCo ═══════════ */
+function loadPercoPack(){
+  if(!confirm('Добавить справочник «Первичная настройка ПО» в общую базу?\nСтатьи и категории из документа PERCo будут созданы один раз, повторы не дублируются.'))return;
+  let added=0;
+  PERCO_PACK.categories.forEach(c=>{
+    if(!db.categories.some(x=>x.id===c.id)){db.categories.push({id:c.id,name:c.name,icon:c.icon,expanded:false,createdAt:now(),updatedAt:now()});added++}
+  });
+  PERCO_PACK.articles.forEach(a=>{
+    if(!db.articles.some(x=>x.id===a.id)){
+      db.articles.push({id:a.id,categoryId:a.categoryId,title:a.title,description:a.description||'',tags:a.tags||[],status:a.status||'published',createdAt:now(),updatedAt:now(),author:g.user?.email,blocks:(a.blocks||[]).map(b=>({id:uid(),type:b.type,content:b.content}))});
+      added++;
+    }
+  });
+  if(added){markDirty();renderSidebar();renderMain();toast('Добавлено в базу: '+added+' элементов справочника')}
+  else toast('Справочник уже загружен ранее','warn');
+}
+
 /* ═══════════ КАТЕГОРИИ ═══════════ */
 function openCatModal(id=null){
   document.getElementById('emojiPick').innerHTML=EMOJIS.map(e=>`<div class="em-opt" data-e="${e}" onclick="pickEmoji('${e}')">${e}</div>`).join('');
@@ -550,7 +667,7 @@ function updBlock(id,v){const b=ui.blocks.find(x=>x.id===id);if(b)b.content=v}
 function delBlock(id){ui.blocks=ui.blocks.filter(x=>x.id!==id);renderBlocks()}
 function moveBlock(id,d){const i=ui.blocks.findIndex(x=>x.id===id);if(i<0)return;const j=i+d;if(j<0||j>=ui.blocks.length)return;[ui.blocks[i],ui.blocks[j]]=[ui.blocks[j],ui.blocks[i]];renderBlocks()}
 
-/* ═══════════ ТАБЛИЦЫ: СЕТКА ═══════════ */
+/* ═══════════ ТАБЛИЦЫ ═══════════ */
 function splitRow(line){const out=[];let cur='';for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='\\'&&line[i+1]==='|'){cur+='|';i++}else if(ch==='|'){out.push(cur);cur=''}else cur+=ch}out.push(cur);return out.map(s=>s.trim())}
 function parseTableGrid(content){if(!content||!content.trim())return[];const rows=content.split('\n').filter(l=>l.trim()!=='').map(splitRow);if(!rows.length)return[];const cols=Math.max(...rows.map(r=>r.length));rows.forEach(r=>{while(r.length<cols)r.push('')});return rows}
 function serializeGrid(grid){return grid.map(r=>r.map(c=>c.replace(/\|/g,'\\|')).join(' | ')).join('\n')}
@@ -619,7 +736,6 @@ function renderBlocks(){
     <div class="ed-block-body">${blockEditorBody(b)}</div>
   </div>`).join('');
 }
-
 function blockEditorBody(b){
   if(b.type==='table'){
     const grid=parseTableGrid(b.content);
@@ -684,6 +800,71 @@ function doSearch(){
 }
 function hl(t){if(!ui.q)return esc(t);return esc(t).replace(new RegExp('('+ui.q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>')}
 
+/* ═══════════ ЭКСПОРТ В PDF ═══════════ */
+function printCss(){
+  return `
+  @page{size:A4;margin:15mm 14mm}
+  body{font-family:'Segoe UI',Arial,sans-serif;color:#111;font-size:11pt;line-height:1.55;margin:0}
+  .doc-head{border-bottom:3px solid #4f46e5;padding-bottom:8px;margin-bottom:16px}
+  .doc-head .t{font-size:20pt;font-weight:700;color:#4f46e5}
+  .doc-head .s{color:#555;font-size:9.5pt;margin-top:4px}
+  .art{margin-bottom:8mm}
+  .art+.art{page-break-before:always}
+  h1.art-t{font-size:17pt;margin:0 0 4px;color:#111}
+  .art-meta{color:#666;font-size:9pt;margin-bottom:10px}
+  .art-desc{font-style:italic;color:#444;margin-bottom:10px}
+  .block{margin-bottom:10px;page-break-inside:avoid}
+  .b-heading{font-size:14pt;font-weight:700;border-bottom:1px solid #bbb;padding-bottom:3px;margin:14px 0 8px}
+  .b-para{white-space:pre-wrap}
+  .b-cmd{border:1px solid #999;border-radius:6px;background:#f4f4f4;padding:8px 10px;font-family:Consolas,monospace;font-size:9.5pt;white-space:pre-wrap;word-break:break-word}
+  .cmd-head{display:none}
+  .b-cmd pre{margin:0;font-family:inherit;white-space:pre-wrap}
+  .b-cmd code{background:none;color:#111;padding:0}
+  .b-warn,.b-info,.b-ok{border:1px solid #999;border-left:5px solid #777;border-radius:5px;padding:8px 10px;background:#fafafa}
+  .b-warn{border-left-color:#d97706;background:#fffbeb}
+  .b-info{border-left-color:#2563eb;background:#eff6ff}
+  .b-ok{border-left-color:#059669;background:#ecfdf5}
+  .b-list li{margin-bottom:3px}
+  .b-table{border:1px solid #999;border-radius:4px;overflow:hidden}
+  .b-table table{width:100%;border-collapse:collapse;font-size:9.5pt}
+  .b-table th{background:#4f46e5;color:#fff;padding:5px 7px;text-align:left}
+  .b-table td{padding:5px 7px;border-top:1px solid #ccc;vertical-align:top}
+  .b-table code{background:#eee;border:1px solid #ccc;border-radius:3px;padding:0 3px;font-size:8.5pt}
+  .b-img img{max-width:100%;border:1px solid #bbb;border-radius:4px}
+  .b-img figcaption{text-align:center;color:#555;font-size:9pt;margin-top:4px;font-style:italic}
+  .tags span{border:1px solid #bbb;border-radius:10px;padding:1px 8px;font-size:8.5pt;margin-right:4px;color:#444}
+  .doc-foot{margin-top:10mm;border-top:1px solid #bbb;padding-top:6px;color:#777;font-size:8.5pt}`;
+}
+function buildPrintHtml(items){
+  const head=`<div class="doc-head"><div class="t">📚 База знаний</div><div class="s">${esc(items.length===1&&items[0].cat?items[0].cat.name:'Экспорт раздела')} · Сформировано: ${new Date().toLocaleString('ru-RU')}</div></div>`;
+  const body=items.map(it=>`
+   <div class="art">
+     <h1 class="art-t">${esc(it.article.title)}</h1>
+     <div class="art-meta">${it.cat?esc(it.cat.name)+' · ':''}${it.article.status==='published'?'Опубликовано':'Черновик'} · Обновлено: ${fmt(it.article.updatedAt)}${it.article.editor?' · '+esc(it.article.editor):''}</div>
+     ${it.article.description?`<div class="art-desc">${esc(it.article.description)}</div>`:''}
+     ${(it.article.tags||[]).length?`<div class="tags" style="margin-bottom:10px">${it.article.tags.map(t=>`<span>🏷️ ${esc(t)}</span>`).join('')}</div>`:''}
+     ${(it.article.blocks||[]).map(blockView).join('')}
+   </div>`).join('');
+  return `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>База знаний — экспорт</title><style>${printCss()}</style></head><body>${head}${body}<div class="doc-foot">Документ сформирован автоматически из командной базы знаний · ${new Date().toLocaleDateString('ru-RU')}</div></body></html>`;
+}
+function openPrintWindow(html){
+  const w=window.open('','_blank','width=950,height=750');
+  if(!w){toast('Браузер заблокировал окно — разрешите всплывающие окна для сайта','error');return}
+  w.document.open();w.document.write(html);w.document.close();
+  setTimeout(()=>{w.focus();w.print()},500);
+}
+function exportPdfArticle(id){
+  const a=arts().find(x=>x.id===id);if(!a)return;
+  const cat=cats().find(c=>c.id===a.categoryId);
+  openPrintWindow(buildPrintHtml([{article:a,cat}]));
+}
+function exportPdfCategory(catId){
+  const cat=cats().find(c=>c.id===catId);if(!cat)return;
+  const list=artsOf(catId);
+  if(!list.length){toast('В категории нет статей для экспорта','warn');return}
+  openPrintWindow(buildPrintHtml(list.map(a=>({article:a,cat}))));
+}
+
 /* ═══════════ РЕНДЕР ═══════════ */
 function renderSidebar(){
   const c=document.getElementById('sidebarContent');
@@ -732,7 +913,7 @@ function renderCatView(c,bc,ha){
   const cat=cats().find(x=>x.id===ui.catId);if(!cat){ui.view='welcome';renderMain();return}
   const a=artsOf(cat.id);
   bc.innerHTML=`<span onclick="goHome()">🏠 Главная</span><span class="separator">/</span><span class="current">${cat.icon} ${esc(cat.name)}</span>`;
-  ha.innerHTML=`<button class="btn btn-primary btn-sm" onclick="createArticle('${cat.id}')">➕ Статья</button><button class="btn btn-secondary btn-sm" onclick="openCatModal('${cat.id}')">✏️</button>`;
+  ha.innerHTML=`<button class="btn btn-secondary btn-sm" onclick="exportPdfCategory('${cat.id}')">🖨️ PDF категории</button><button class="btn btn-primary btn-sm" onclick="createArticle('${cat.id}')">➕ Статья</button><button class="btn btn-secondary btn-sm" onclick="openCatModal('${cat.id}')">✏️</button>`;
   if(!a.length){c.innerHTML=`<div class="empty-state"><div class="empty-icon">📄</div><h2>Пока пусто</h2><p>Создайте первую статью в категории «${esc(cat.name)}»</p><button class="btn btn-primary" onclick="createArticle('${cat.id}')">➕ Создать статью</button></div>`;return}
   c.innerHTML=`<div class="wrap"><h1 style="font-size:1.85rem;margin-bottom:.35rem">${cat.icon} ${esc(cat.name)}</h1><p style="color:var(--text2);margin-bottom:1.5rem">Статей: ${a.length}</p>
   ${a.map(x=>`<div class="card" onclick="openArticle('${x.id}')">
@@ -745,7 +926,7 @@ function renderArtView(c,bc,ha){
   const a=arts().find(x=>x.id===ui.artId);if(!a){ui.view='welcome';renderMain();return}
   const cat=cats().find(x=>x.id===a.categoryId);
   bc.innerHTML=`<span onclick="goHome()">🏠</span><span class="separator">/</span>${cat?`<span onclick="openCat('${cat.id}')">${cat.icon} ${esc(cat.name)}</span><span class="separator">/</span>`:''}<span class="current">${esc(a.title)}</span>`;
-  ha.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openEditor('${a.id}')">✏️ Редактировать</button><button class="btn btn-danger btn-sm" onclick="deleteArticle('${a.id}')">🗑️</button>`;
+  ha.innerHTML=`<button class="btn btn-secondary btn-sm" onclick="exportPdfArticle('${a.id}')">🖨️ PDF</button><button class="btn btn-primary btn-sm" onclick="openEditor('${a.id}')">✏️ Редактировать</button><button class="btn btn-danger btn-sm" onclick="deleteArticle('${a.id}')">🗑️</button>`;
   c.innerHTML=`<div class="wrap"><div class="art-header">
     <div style="margin-bottom:.6rem"><span class="badge ${a.status}">${a.status==='published'?'✅ Опубликовано':'📝 Черновик'}</span></div>
     <h1 class="art-title">${esc(a.title)}</h1>
